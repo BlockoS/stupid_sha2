@@ -3,7 +3,7 @@
  =========================================================================
  v0.0.1
  Licensed under the MIT License
- (c) 2023 Vincent Cruz
+ (c) 2024 Vincent Cruz
  
  About:
  ------
@@ -167,10 +167,10 @@ void sha_384_512_finalize(sha_384_512_ctx_t *ctx);
 #ifdef STUPID_SHA2_IMPLEMENTATION
 
 enum {
-	SHA_224_HASH_SIZE = 28,
-	SHA_256_HASH_SIZE = 32,
-	SHA_384_HASH_SIZE = 48,
-	SHA_512_HASH_SIZE = 64 
+	SHA_224_HASH_SIZE = 28U,
+	SHA_256_HASH_SIZE = 32U,
+	SHA_384_HASH_SIZE = 48U,
+	SHA_512_HASH_SIZE = 64U 
 };
 
 static inline uint32_t hash_size(sha_alg_t alg) {
@@ -193,8 +193,8 @@ static inline uint32_t shr32(uint32_t x, uint32_t n) {
 }
 
 static inline uint32_t rotr32(uint32_t x, uint32_t n) {
-	n &= 31;
-	return (x >> n) | (x << (32 - n));
+	n &= 31U;
+	return (x >> n) | (x << (32U - n));
 }
 
 static inline uint32_t ch32(uint32_t x, uint32_t y, uint32_t z) {
@@ -206,19 +206,19 @@ static inline uint32_t maj32(uint32_t x, uint32_t y, uint32_t z) {
 }
 
 static inline uint32_t bsig0_32(uint32_t x) {
-	return rotr32(x, 2) ^ rotr32(x, 13) ^ rotr32(x, 22);
+	return rotr32(x, 2U) ^ rotr32(x, 13U) ^ rotr32(x, 22U);
 }
 
 static inline uint32_t bsig1_32(uint32_t x) {
-	return rotr32(x, 6) ^ rotr32(x, 11) ^ rotr32(x, 25);
+	return rotr32(x, 6U) ^ rotr32(x, 11U) ^ rotr32(x, 25U);
 }
 
 static inline uint32_t ssig0_32(uint32_t x) {
-	return rotr32(x, 7) ^ rotr32(x, 18) ^ shr32(x, 3);
+	return rotr32(x, 7U) ^ rotr32(x, 18) ^ shr32(x, 3);
 }
 
 static inline uint32_t ssig1_32(uint32_t x) {
-	return rotr32(x, 17) ^ rotr32(x, 19) ^ shr32(x, 10);
+	return rotr32(x, 17U) ^ rotr32(x, 19U) ^ shr32(x, 10U);
 }
 
 bool sha_224_256_init(sha_224_256_ctx_t *ctx, sha_alg_t alg) {
@@ -226,7 +226,6 @@ bool sha_224_256_init(sha_224_256_ctx_t *ctx, sha_alg_t alg) {
 	memset(ctx, 0, sizeof(sha_224_256_ctx_t));
 	if((ctx == NULL) || ((alg != SHA_224) && (alg != SHA_256))) {
 		ctx->alg = SHA_INVALID;
-		ret = false;
 	} else {
 		ctx->alg = alg;
 		if(alg == SHA_224) {
@@ -254,7 +253,7 @@ bool sha_224_256_init(sha_224_256_ctx_t *ctx, sha_alg_t alg) {
 }
 
 void sha_224_256_update(sha_224_256_ctx_t *ctx, uint8_t v) {
-	static uint32_t g_k_32[64] = {
+	static const uint32_t g_k_32[64] = {
 		0x428A2F98U, 0x71374491U, 0xB5C0FBCFU, 0xE9B5DBA5U,
 		0x3956C25BU, 0x59F111F1U, 0x923F82A4U, 0xAB1C5ED5U,
 		0xD807AA98U, 0x12835B01U, 0x243185BEU, 0x550C7DC3U,
@@ -278,7 +277,7 @@ void sha_224_256_update(sha_224_256_ctx_t *ctx, uint8_t v) {
 	ctx->w[index] |= v;
 
 	ctx->step++;
-	if(ctx->step == 64) {
+	if(ctx->step == 64U) {
 		uint32_t a = ctx->h[0];
 		uint32_t b = ctx->h[1];
 		uint32_t c = ctx->h[2];
@@ -288,21 +287,21 @@ void sha_224_256_update(sha_224_256_ctx_t *ctx, uint8_t v) {
 		uint32_t g = ctx->h[6];
 		uint32_t h = ctx->h[7];
 
-		for(uint32_t i=16; i<64; i++) {
-			ctx->w[i] = ssig1_32(ctx->w[i - 2]) + ctx->w[i - 7] + ssig0_32(ctx->w[i - 15]) + ctx->w[i - 16];
+		for(uint32_t i=16U; i<64U; i++) {
+			ctx->w[i] = ssig1_32(ctx->w[i - 2U]) + ctx->w[i - 7U] + ssig0_32(ctx->w[i - 15U]) + ctx->w[i - 16U];
 		}
 
-		for(uint32_t i=0; i<64; i++) {
+		for(uint32_t i=0; i<64U; i++) {
 			uint32_t t1 = h + bsig1_32(e) + ch32(e,f,g) + g_k_32[i] + ctx->w[i];
-            uint32_t t2 = bsig0_32(a) + maj32(a,b,c);
-            h = g;
-            g = f;
-            f = e;
-            e = d + t1;
-            d = c;
-            c = b;
-            b = a;
-            a = t1 + t2;
+			uint32_t t2 = bsig0_32(a) + maj32(a,b,c);
+			h = g;
+			g = f;
+			f = e;
+			e = d + t1;
+			d = c;
+			c = b;
+			b = a;
+			a = t1 + t2;
 		}
 
 		ctx->h[0] += a;
@@ -316,13 +315,13 @@ void sha_224_256_update(sha_224_256_ctx_t *ctx, uint8_t v) {
 
 		ctx->step = 0;
 	}
-	ctx->length += 8;
+	ctx->length += 8U;
 }
 
 void sha_224_256_finalize(sha_224_256_ctx_t *ctx) {
 	uint64_t len = ctx->length;
-	sha_224_256_update(ctx, 0x80);
-	while(ctx->step != 56) {
+	sha_224_256_update(ctx, 0x80U);
+	while(ctx->step != 56U) {
 		sha_224_256_update(ctx, 0x00);
 	}
 	for(int32_t i=56; i>=0; i-=8) {
@@ -343,7 +342,7 @@ static inline bool sha_224_256(sha_alg_t alg, const unsigned char *data, size_t 
 		}
 		sha_224_256_finalize(&ctx);
 		for(uint32_t i=0; i<sz; i++) {
-			digest[i] = ctx.h[i>>2] >> (8 * (3 - (i & 0x03)));
+			digest[i] = ctx.h[i>>2] >> (8U * (3U - (i & 0x03U)));
 		}
 		ret = true;
 	}
@@ -363,8 +362,8 @@ static inline uint64_t shr64(uint64_t x, uint64_t n) {
 }
 
 static inline uint64_t rotr64(uint64_t x, uint32_t n) {
-	n &= 63;
-	return (x >> n) | (x << (64 - n));
+	n &= 63U;
+	return (x >> n) | (x << (64U - n));
 }
 
 static inline uint64_t ch64(uint64_t x, uint64_t y, uint64_t z) {
@@ -424,7 +423,7 @@ bool sha_384_512_init(sha_384_512_ctx_t *ctx, sha_alg_t alg) {
 }
 
 void sha_384_512_update(sha_384_512_ctx_t *ctx, uint8_t v) {
-	static uint64_t g_k_64[] = {
+	static const uint64_t g_k_64[] = {
 		0x428A2F98D728AE22UL, 0x7137449123EF65CDUL, 0xB5C0FBCFEC4D3B2FUL, 0xE9B5DBA58189DBBCUL,
 		0x3956C25BF348B538UL, 0x59F111F1B605D019UL, 0x923F82A4AF194F9BUL, 0xAB1C5ED5DA6D8118UL,
 		0xD807AA98A3030242UL, 0x12835B0145706FBEUL, 0x243185BE4EE4B28CUL, 0x550C7DC3D5FFB4E2UL,
@@ -452,7 +451,7 @@ void sha_384_512_update(sha_384_512_ctx_t *ctx, uint8_t v) {
 	ctx->w[index] |= v;
 
 	ctx->step++;
-	if(ctx->step == 128) {
+	if(ctx->step == 128U) {
 		uint64_t a = ctx->h[0];
 		uint64_t b = ctx->h[1];
 		uint64_t c = ctx->h[2];
@@ -462,21 +461,21 @@ void sha_384_512_update(sha_384_512_ctx_t *ctx, uint8_t v) {
 		uint64_t g = ctx->h[6];
 		uint64_t h = ctx->h[7];
 
-		for(uint32_t i=16; i<80; i++) {
-			ctx->w[i] = ssig1_64(ctx->w[i - 2]) + ctx->w[i - 7] + ssig0_64(ctx->w[i - 15]) + ctx->w[i - 16];
+		for(uint32_t i=16U; i<80U; i++) {
+			ctx->w[i] = ssig1_64(ctx->w[i - 2U]) + ctx->w[i - 7U] + ssig0_64(ctx->w[i - 15U]) + ctx->w[i - 16U];
 		}
 
-		for(uint32_t i=0; i<80; i++) {
+		for(uint32_t i=0; i<80U; i++) {
 			uint64_t t1 = h + bsig1_64(e) + ch64(e,f,g) + g_k_64[i] + ctx->w[i];
-            uint64_t t2 = bsig0_64(a) + maj64(a,b,c);
-            h = g;
-            g = f;
-            f = e;
-            e = d + t1;
-            d = c;
-            c = b;
-            b = a;
-            a = t1 + t2;
+			uint64_t t2 = bsig0_64(a) + maj64(a,b,c);
+			h = g;
+			g = f;
+			f = e;
+			e = d + t1;
+			d = c;
+			c = b;
+			b = a;
+			a = t1 + t2;
 		}
 
 		ctx->h[0] += a;
@@ -491,7 +490,7 @@ void sha_384_512_update(sha_384_512_ctx_t *ctx, uint8_t v) {
 		ctx->step = 0;
 	}
 	uint64_t tmp = ctx->length_lo;
-	ctx->length_lo += 8;
+	ctx->length_lo += 8U;
 	if(ctx->length_lo < tmp) {
 		++ctx->length_hi;
 	}
@@ -500,8 +499,8 @@ void sha_384_512_update(sha_384_512_ctx_t *ctx, uint8_t v) {
 void sha_384_512_finalize(sha_384_512_ctx_t *ctx) {
 	uint64_t len_hi = ctx->length_hi;
 	uint64_t len_lo = ctx->length_lo;
-	sha_384_512_update(ctx, 0x80);
-	while(ctx->step != 112) {
+	sha_384_512_update(ctx, 0x80U);
+	while(ctx->step != 112U) {
 		sha_384_512_update(ctx, 0x00);
 	}
 	for(int32_t i=56; i>=0; i-=8) {
@@ -525,7 +524,7 @@ static inline bool sha_384_512(sha_alg_t alg, const unsigned char *data, size_t 
 		}
 		sha_384_512_finalize(&ctx);
 		for(uint32_t i=0; i<sz; i++) {
-			digest[i] = ctx.h[i>>3] >> (8 * (7 - (i & 0x07)));
+			digest[i] = ctx.h[i>>3] >> (8U * (7U - (i & 0x07U)));
 		}
 		ret = true;
 	}
